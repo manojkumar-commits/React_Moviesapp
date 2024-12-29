@@ -39,7 +39,7 @@ const FavoriteMovies = () => {
         <div style={{ padding: '20px' }}>
             <h2>Favorite Movies</h2>
             {/* Back to Movies Dashboard Button */}
-            <Link to="/dashboard" style={{ textDecoration: 'none', marginTop: '20px', display: 'inline-block' }}>
+            <Link to="/dashboard" style={{ textDecoration: 'none', marginTop: '20px', display: 'inline-block', float: 'left' }}>
                 <Button variant="contained" color="primary">
                     Back to Movie Dashboard
                 </Button>

@@ -24,7 +24,7 @@ const Login = () => {
       });
       // Save token and expiry in localStorage
       const token = response.data.token;
-      const expiryTime = Date.now() + 10 * 1000; // 10 seconds expiry for demo purpose
+      const expiryTime = Date.now() + 60 * 1000; // 10 seconds expiry for demo purpose
       localStorage.setItem('token', token);
       localStorage.setItem('tokenExpiry', expiryTime);
 
