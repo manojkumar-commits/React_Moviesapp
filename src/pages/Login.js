@@ -3,8 +3,9 @@ import axios from 'axios';
 import { TextField, Button, Container, Alert, Grid, Box, Typography, Link, IconButton, InputAdornment } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import useNavigation from '../pages/Hooks/useNavigation';
-import { ToastContainer, toast } from 'react-toastify'; // Import the necessary components
-import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for styling the toasts
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import bcrypt from 'bcryptjs'; // Import bcryptjs
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -18,21 +19,33 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/login', {
-        email,
-        password,
-      });
-      // Save token and expiry in localStorage
-      const token = response.data.token;
-      const expiryTime = Date.now() + 60 * 1000; // 10 seconds expiry for demo purpose
-      localStorage.setItem('token', token);
-      localStorage.setItem('tokenExpiry', expiryTime);
+      // Fetch all users from JSON Server
+      const response = await axios.get('http://localhost:5000/users');
+      const users = response.data;
+      const user = users.find((user) => user.email === email);
 
-      setMessage({ type: 'success', text: response.data.message });
-      toast.success("Login Successful!");
-      goToPage('/dashboard');
+      if (user) {
+        // Compare entered password with the hashed password in the database
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (isPasswordValid) {
+          const token = 'dummy-token';
+          const expiryTime = Date.now() + 30 * 1000;
+          localStorage.setItem('token', token);
+          localStorage.setItem('tokenExpiry', expiryTime);
+          setMessage({ type: 'success', text: 'Login Successful!' });
+          toast.success("Login Successful!");
+          goToPage('/dashboard');
+        } else {
+          setMessage({ type: 'error', text: 'Invalid email or password' });
+          toast.error('Invalid email or password');
+        }
+      } else {
+        setMessage({ type: 'error', text: 'Invalid email or password' });
+        toast.error('Invalid email or password');
+      }
     } catch (error) {
       setMessage({ type: 'error', text: error.response?.data?.message || 'An error occurred' });
+      toast.error('An error occurred');
     }
   };
 
@@ -73,7 +86,7 @@ const Login = () => {
             />
             <TextField
               label="Password"
-              type={showPassword ? 'text' : 'password'} // Toggle between text and password types
+              type={showPassword ? 'text' : 'password'}
               variant="outlined"
               fullWidth
               margin="normal"
@@ -93,12 +106,6 @@ const Login = () => {
                 ),
               }}
             />
-            {/* <Link
-              href="#"
-              sx={{ display: 'block', textAlign: 'right', marginBottom: 2, fontSize: '0.9rem', color: '#1976d2' }}
-            >
-              Forgot Password?
-            </Link> */}
             <Button
               variant="contained"
               color="primary"
